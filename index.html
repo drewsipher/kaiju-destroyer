@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kaiju Destroyer</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Bangers&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <div id="pops"></div>
+
+  <div id="hud" hidden>
+    <div class="panel tl">
+      <div class="lvlName" id="hudLevel"></div>
+      <div class="meter hp"><div id="hpFill" class="fill"></div><span id="hpText"></span></div>
+      <div class="meter grow"><div id="growFill" class="fill"></div><span>SIZE <b id="sizeText"></b></span></div>
+      <div class="goal" id="hudGoal"></div>
+      <div id="frenzyBox" class="meter frenzy"><div id="frenzyFill" class="fill"></div><span>FRENZY [F]</span></div>
+      <div id="staminaBox" class="meter stamina off"><div id="staminaFill" class="fill"></div><span>WINGS</span></div>
+    </div>
+    <div class="panel tr">
+      <div class="score" id="score">0</div>
+      <div class="combo" id="combo"></div>
+      <div class="dnaCount" id="dnaCount"></div>
+      <div class="power" id="power"></div>
+    </div>
+    <div id="bossbar" hidden><div id="bossName"></div><div class="meter"><div id="bossFill" class="fill"></div></div></div>
+    <div id="abilities">
+      <div class="ab"><div class="cd" id="cd-chomp"></div><b>CHOMP</b><i>L-Click</i></div>
+      <div class="ab"><div class="cd" id="cd-dash"></div><b>DASH</b><i>Shift</i></div>
+      <div class="ab"><div class="cd" id="cd-stomp"></div><b>STOMP</b><i>Q</i></div>
+      <div class="ab" id="ab-spit"><div class="cd" id="cd-spit"></div><b>ACID</b><i>R-Click</i></div>
+      <div class="ab" id="ab-roar"><div class="cd" id="cd-roar"></div><b>ROAR</b><i>E</i></div>
+      <div class="ab" id="ab-web"><div class="cd" id="cd-web"></div><b>WEB</b><i>T</i></div>
+      <div class="ab" id="ab-beam"><div class="cd" id="cd-beam"></div><b>BEAM</b><i>R</i></div>
+    </div>
+    <div id="hint"></div>
+    <div id="banner"></div>
+  </div>
+
+  <div id="screens" hidden></div>
+  <noscript>Kaiju Destroyer needs JavaScript.</noscript>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

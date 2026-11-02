@@ -1,0 +1,176 @@
+/* Kaiju Destroyer — hand-drawn paper & ink UI, carried over from Stickbox (wobbly ink borders,
+   Patrick Hand lettering), with Bangers for the comic-book shouting. */
+:root { --ink: #111; --paper: #fbf7ee; --green: #8dff5a; --red: #e53935; --gold: #ffd23f; --pink: #ff5af0;
+  --wobble: 255px 15px 225px 15px / 15px 225px 15px 255px; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #222; color: var(--ink);
+  font-family: 'Patrick Hand', 'Comic Sans MS', cursive; user-select: none; -webkit-user-select: none; }
+#view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; cursor: crosshair; }
+
+/* ---------- comic popups ---------- */
+#pops { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
+.pop { position: absolute; left: 0; top: 0; display: none; white-space: nowrap; font-family: 'Bangers', 'Patrick Hand', cursive; letter-spacing: 1px;
+  color: #fff; -webkit-text-stroke: 1.5px var(--ink); text-shadow: 2px 2px 0 var(--ink); will-change: transform, opacity; }
+.pop.pts { font-size: 20px; color: #fff; }
+.pop.dmg { font-size: 18px; color: #ffe8a8; }
+.pop.pow { font-size: 34px; color: var(--gold); -webkit-text-stroke: 2px var(--ink); text-shadow: 3px 3px 0 var(--ink); }
+.pop.big { font-size: 52px; color: var(--gold); -webkit-text-stroke: 2.5px var(--ink); text-shadow: 4px 4px 0 var(--ink); }
+.pop.info { font-family: 'Patrick Hand', cursive; font-size: 18px; color: #fff; -webkit-text-stroke: 0; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+
+/* ---------- HUD ---------- */
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 4; }
+#hud[hidden] { display: none; }
+.panel { position: absolute; background: var(--paper); border: 2.5px solid var(--ink); border-radius: var(--wobble); padding: 8px 14px; box-shadow: 4px 4px 0 rgba(0,0,0,0.6); }
+.panel.tl { left: 12px; top: 12px; width: 280px; }
+.panel.tr { right: 12px; top: 12px; text-align: right; min-width: 160px; }
+.lvlName { font-size: 17px; margin-bottom: 4px; }
+.goal { font-size: 14px; opacity: 0.75; margin: -2px 0 4px; }
+.meter { position: relative; height: 20px; border: 2px solid var(--ink); border-radius: 10px 4px 10px 4px; background: #e8e0d0; margin: 5px 0; overflow: hidden; }
+.meter .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; transition: width .12s; }
+.meter span { position: relative; display: block; text-align: center; font-size: 14px; line-height: 16px; z-index: 1; }
+.meter.hp .fill { background: linear-gradient(#ff6b5a, #c62828); }
+.meter.grow .fill { background: linear-gradient(#b8ff8a, #4caf50); }
+.meter.frenzy .fill { background: linear-gradient(#ffa8f5, #c51aa8); }
+.meter.frenzy.ready { animation: pulse .5s infinite alternate; }
+.meter.frenzy.active .fill { background: linear-gradient(#fff, #ff5af0); }
+.meter.stamina .fill { background: linear-gradient(#cdf3ff, #3fb8ff); }
+.meter.off { display: none; }
+@keyframes pulse { from { box-shadow: 0 0 0 0 var(--pink); } to { box-shadow: 0 0 10px 3px var(--pink); } }
+.score { font-family: 'Bangers', cursive; font-size: 38px; letter-spacing: 1px; line-height: 1; }
+.combo { font-size: 18px; color: #b8860b; min-height: 22px; }
+.dnaCount { font-size: 18px; }
+#bossbar { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: min(560px, 44vw); text-align: center; }
+#bossbar[hidden] { display: none; }
+#bossName { font-family: 'Bangers', cursive; font-size: 28px; color: #fff; -webkit-text-stroke: 1.5px var(--ink); text-shadow: 3px 3px 0 var(--ink); letter-spacing: 1px; }
+#bossbar .meter { height: 22px; background: #3a1010; }
+#bossbar .fill { background: linear-gradient(#ff8a5a, #b71c1c); }
+#abilities { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+.ab { position: relative; width: 74px; height: 56px; background: var(--paper); border: 2.5px solid var(--ink); border-radius: var(--wobble); text-align: center; overflow: hidden; box-shadow: 3px 3px 0 rgba(0,0,0,0.6); }
+.ab[hidden] { display: none; }
+.ab b { display: block; font-size: 16px; margin-top: 6px; position: relative; }
+.ab i { font-style: normal; font-size: 13px; opacity: 0.7; position: relative; }
+.ab .cd { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(0,0,0,0.35); }
+#hint { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); font-size: 19px; color: #fff; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; white-space: nowrap; }
+#banner { position: absolute; top: 28%; left: 50%; transform: translate(-50%, -50%) scale(0.6) rotate(-3deg); opacity: 0; transition: transform .25s, opacity .25s;
+  font-family: 'Bangers', cursive; font-size: 64px; letter-spacing: 2px; color: var(--gold); -webkit-text-stroke: 2.5px var(--ink); text-shadow: 5px 5px 0 var(--ink); white-space: nowrap; }
+#banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-3deg); }
+#banner.warn { color: #ff4a3a; animation: flash .35s infinite alternate; font-size: 48px; }
+@keyframes flash { from { opacity: 1; } to { opacity: 0.55; } }
+
+/* ---------- screens ---------- */
+#screens { position: fixed; inset: 0; z-index: 10; }
+#screens[hidden] { display: none; }
+.screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(20, 18, 14, 0.45); overflow: auto; }
+.screen.title { background: radial-gradient(ellipse at center, rgba(0,0,0,0.05), rgba(0,0,0,0.55)); }
+.card { position: relative; max-width: 760px; width: 100%; max-height: 100%; overflow: auto; background: var(--paper); border: 3px solid var(--ink); border-radius: var(--wobble); padding: 22px 30px; box-shadow: 7px 7px 0 var(--ink); text-align: center; }
+.card.wide { max-width: 1500px; text-align: left; padding: 16px 20px; }
+.card h1 { font-family: 'Bangers', cursive; font-size: 54px; letter-spacing: 2px; margin: 0 0 6px; }
+.card h2 { font-size: 34px; margin: 0 0 10px; }
+.card h3 { font-size: 22px; margin: 14px 0 6px; border-bottom: 2px solid var(--ink); }
+.logo { font-family: 'Bangers', cursive; font-size: 84px !important; line-height: 1; color: var(--green); -webkit-text-stroke: 3px var(--ink); text-shadow: 6px 6px 0 var(--ink); transform: rotate(-3deg); margin: 4px 0 14px !important; }
+.logo span { font-size: 44px; color: var(--gold); }
+.tag { font-size: 21px; margin: 4px 0 12px; }
+.kicker { font-size: 18px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7; margin: 0; }
+.small { font-size: 16px; opacity: 0.8; }
+.red { color: var(--red); }
+.row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.col { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+button { font: inherit; font-size: 19px; padding: 6px 16px; border: 2.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; border-radius: var(--wobble); }
+button:hover { background: var(--ink); color: var(--paper); }
+button:active { transform: translate(1px, 1px); }
+button.big { font-size: 24px; padding: 8px 22px; box-shadow: 4px 4px 0 var(--ink); }
+button.big:hover { box-shadow: none; transform: translate(2px, 2px); }
+button.toggle.on { background: #2e7d32; color: #fff; }
+button.danger { border-color: var(--red); color: var(--red); }
+.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.lvl { padding: 4px 12px; }
+.lvl { text-align: left; font-size: 18px; }
+.lvl small { float: right; opacity: 0.7; }
+.lvl.locked { opacity: 0.35; cursor: not-allowed; }
+.lvl.locked:hover { background: var(--paper); color: var(--ink); }
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; text-align: left; }
+.cols2 ul { padding-left: 20px; font-size: 18px; line-height: 1.4; margin: 0; }
+kbd { display: inline-block; border: 2px solid var(--ink); border-radius: 5px; padding: 0 6px; margin: 0 2px; font-family: inherit; font-size: 15px; background: #fff; box-shadow: 1px 2px 0 var(--ink); }
+.rank { font-family: 'Bangers', cursive; font-size: 110px; line-height: 1; margin: 4px auto; width: 140px; height: 140px; border: 4px solid var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); box-shadow: 5px 5px 0 var(--ink); }
+.rank.rS { background: var(--gold); } .rank.rA { background: #8dff5a; } .rank.rB { background: #7fd8ff; } .rank.rC { background: #ddd; }
+.stats { margin: 10px auto; font-size: 20px; border-collapse: collapse; min-width: 320px; }
+.stats td { padding: 2px 14px; border-bottom: 1.5px dashed #999; text-align: left; }
+.stats td:last-child { text-align: right; font-weight: bold; }
+.stats tr.dna td { color: #7d3c98; font-size: 24px; }
+.credits { margin-top: 14px; font-size: 17px; opacity: 0.85; }
+
+/* ---------- evolution ---------- */
+.evoHead { display: flex; align-items: center; gap: 14px; }
+.evoHead h1 { margin: 0; flex: 1; }
+.dnaBank { font-size: 28px; font-weight: bold; color: #7d3c98; }
+.evoBody { display: grid; grid-template-columns: 1fr 340px; gap: 16px; margin-top: 8px; }
+.tree { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; align-content: start; }
+.branch { border: 2.5px solid var(--bc); border-radius: 14px 6px 14px 6px; padding: 6px 10px 10px; background: color-mix(in srgb, var(--bc) 8%, var(--paper)); }
+.branch h3 { margin: 0 0 6px; border-color: var(--bc); color: var(--bc); font-size: 22px; }
+.branch h3 small { font-size: 14px; color: #555; }
+.grid { position: relative; display: grid; gap: 14px 10px; }
+.links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.links line { stroke: #bbb; stroke-width: 0.06; stroke-dasharray: 0.1 0.08; }
+.links line.lit { stroke: var(--bc); stroke-dasharray: none; stroke-width: 0.08; }
+.node { position: relative; z-index: 1; font-size: 15px; padding: 5px 6px; line-height: 1.1; min-height: 50px; text-align: center; background: var(--paper); }
+.node b { display: block; font-size: 16px; }
+.node span { font-size: 14px; opacity: 0.8; }
+.node.owned { background: var(--bc); color: #fff; border-color: var(--ink); }
+.node.owned:hover { background: var(--bc); color: #fff; }
+.node.buy { box-shadow: 0 0 0 3px var(--bc), 3px 3px 0 3px var(--ink); animation: glow 1s infinite alternate; }
+.node.poor { opacity: 0.75; }
+.node.locked { opacity: 0.4; }
+.node.locked:hover, .node.poor:hover { background: var(--paper); color: var(--ink); }
+@keyframes glow { to { box-shadow: 0 0 10px 3px var(--bc), 3px 3px 0 3px var(--ink); } }
+.side { display: flex; flex-direction: column; gap: 10px; }
+#preview { width: 100%; height: 260px; border: 2.5px solid var(--ink); border-radius: var(--wobble); background: radial-gradient(#fffaf0, #d9cfb8); }
+.skillinfo { min-height: 92px; font-size: 17px; border: 2px dashed var(--ink); border-radius: 8px; padding: 8px 10px; }
+.skillinfo .cost { color: #7d3c98; font-weight: bold; }
+.looks > div { margin: 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 17px; }
+.looks b { width: 76px; }
+.sw { width: 28px; height: 28px; padding: 0; border-radius: 50%; }
+.sw.sel { box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--ink); }
+.pt { font-size: 15px; padding: 2px 8px; }
+.pt.sel { background: var(--ink); color: var(--paper); }
+@media (max-width: 1000px) { .evoBody { grid-template-columns: 1fr; } .tree { grid-template-columns: 1fr; } .cols2 { grid-template-columns: 1fr; } .logo { font-size: 56px !important; } }
+
+/* ---------- Kaiju Destroyer: hatch, draft, Body Lab ---------- */
+.power { font-size: 15px; opacity: 0.75; }
+.ng { display: inline-block; background: #c0392b; color: #fff; border-radius: 6px; padding: 0 6px; font-size: 0.8em; }
+.pulse { animation: pulseBtn 0.8s infinite alternate; }
+@keyframes pulseBtn { to { box-shadow: 0 0 14px 4px var(--gold), 4px 4px 0 var(--ink); } }
+.cards { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+.pcard { flex: 1 1 220px; max-width: 300px; border: 2.5px solid var(--ink); border-radius: var(--wobble); padding: 10px; background: #fffdf6; display: flex; flex-direction: column; gap: 4px; text-align: center; }
+.pcard > b { font-size: 21px; }
+.pcard p { margin: 2px 0; font-size: 16px; }
+.pcard small { opacity: 0.7; }
+.pcard button { margin-top: auto; }
+canvas.pv { width: 100%; height: 190px; border: 2px solid var(--ink); border-radius: 10px; background: radial-gradient(#fffaf0, #d9cfb8); display: block; }
+canvas.pv.big { height: 280px; }
+.slotTag { display: inline-block; margin: 0 auto; font-size: 13px; padding: 0 8px; border-radius: 8px; color: #fff; background: #777; }
+.slotTag.t1, .chipPart.t1 { --tc: #4f9d4a; } .slotTag.t2, .chipPart.t2 { --tc: #2e86c1; } .slotTag.t3, .chipPart.t3 { --tc: #c0392b; }
+.slotTag { background: var(--tc, #777); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chipPart { font-size: 15px; padding: 3px 10px; border-color: var(--tc, var(--ink)); border-width: 2.5px; }
+.chipPart small { display: block; font-size: 12px; opacity: 0.7; }
+.chipPart.sel { background: var(--tc, var(--ink)); color: #fff; }
+.chipPart.sel:hover { background: var(--tc, var(--ink)); }
+.labBody h3 { font-size: 20px; margin: 10px 0 4px; }
+.labBody h3 small { font-size: 14px; opacity: 0.7; font-weight: normal; }
+.labRow { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 8px; margin: 4px 0; }
+.labRow h3 { margin: 0; border: 0; font-size: 18px; }
+.sockets { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+.sock { border: 2px dashed var(--ink); border-radius: 10px; padding: 6px 8px; }
+.sock > b { font-size: 18px; } .sock > small { display: block; font-size: 13px; opacity: 0.7; margin-bottom: 4px; }
+.sock.locked { opacity: 0.45; }
+.tabs { display: flex; gap: 6px; }
+.tabs button.sel { background: var(--ink); color: var(--paper); }
+.statBox { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 16px; border: 2px solid var(--ink); border-radius: 8px; padding: 6px 10px; }
+.statBox div { display: flex; justify-content: space-between; }
+.note { background: #fff3c4; border: 2px solid #d4a017; border-radius: 8px; padding: 4px 10px; margin: 6px 0; font-size: 17px; }
+.pips { display: flex; gap: 3px; justify-content: center; margin: 2px 0; }
+.pips i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--ink); background: #fff; }
+.pips i.on { background: var(--bc); }
+.node.owned .pips i.on { background: #fff; }
+.node.part { box-shadow: 0 0 0 2px var(--bc); }
+.evoHead .tabs { margin-right: auto; }
